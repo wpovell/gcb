@@ -7,15 +7,15 @@ import (
 )
 
 const (
-	FontFn    = "/home/wpovell/.local/share/fonts/FiraCode-Regular.ttf"
-	FontSize  = 12
-	FontDpi   = 72
-	BarH = 27
+	FontFn   = "/home/wpovell/.local/share/fonts/FiraCode-Regular.ttf"
+	FontSize = 12
+	FontDpi  = 72
+	BarH     = 27
 )
 
 var FG, BG xgraphics.BGRA
 
 func init() {
-	FG = color.HexToBGRA("#2E3440")
-	BG = color.HexToBGRA("#D8DEE9")
+	BG = color.HexToBGRA("#2E3440")
+	FG = color.HexToBGRA("#D8DEE9")
 }

@@ -2,7 +2,7 @@ package bar
 
 import (
 	"github.com/BurntSushi/xgbutil/xevent"
-  "github.com/BurntSushi/xgbutil/xgraphics"
+	"github.com/BurntSushi/xgbutil/xgraphics"
 )
 
 type Block interface {
