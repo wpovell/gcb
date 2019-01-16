@@ -13,7 +13,6 @@ import (
 
 type Time struct {
 	bar    *bar.Bar
-	ticker *time.Ticker
 	drawer *font.Drawer
 	txt    string
 }
@@ -21,7 +20,6 @@ type Time struct {
 func Create(b *bar.Bar) *Time {
 	return &Time{
 		bar:    b,
-		ticker: nil,
 		drawer: text.Drawer(),
 	}
 }
@@ -42,7 +40,6 @@ func timeUntilMin() time.Duration {
 }
 
 func (t *Time) Start() {
-	t.ticker = time.NewTicker(time.Minute)
 	go func() {
 		for {
 			t.txt = time.Now().Format("Jan 02 03:04 PM")
