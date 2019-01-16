@@ -41,7 +41,6 @@ func (b *Bat) Start() {
 	b.ticker = time.NewTicker(time.Second)
 	go func() {
 		for {
-			<-b.ticker.C
 			bat := info()
 			if bat.state == Charging {
 				b.txt = fmt.Sprintf("Charging %d%%", bat.charge)
@@ -49,6 +48,7 @@ func (b *Bat) Start() {
 				b.txt = fmt.Sprintf("Discharging %d%%", bat.charge)
 			}
 			b.bar.Redraw <- b
+			<-b.ticker.C
 		}
 	}()
 }

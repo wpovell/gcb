@@ -45,7 +45,6 @@ func (w *Wifi) Start() {
 	w.ticker = time.NewTicker(time.Second)
 	go func() {
 		for {
-			<-w.ticker.C
 			txt, err := ssid(intf)
 			if err != nil {
 				w.txt = "No Wifi"
@@ -53,6 +52,7 @@ func (w *Wifi) Start() {
 				w.txt = txt
 			}
 			w.bar.Redraw <- w
+			<-w.ticker.C
 		}
 	}()
 }
