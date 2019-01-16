@@ -26,6 +26,14 @@ func (bar *Bar) findBlock(x int) Block {
 // Loop waiting for redraw requests
 func (bar *Bar) Start() {
 	go func() {
+		// Start blocks
+		for _, arr := range bar.blocks {
+			for _, block := range arr {
+				block.Start()
+			}
+		}
+
+		// Handle redraw requests
 		for {
 			<-bar.Redraw
 			bar.draw()
@@ -38,6 +46,7 @@ func (bar *Bar) AddBlock(pos Align, blk Block) {
 	bar.blocks[pos] = append(bar.blocks[pos], blk)
 }
 
+// Draw entire bar
 func (bar *Bar) draw() {
 	// Background
 	bar.img.For(func(x, y int) xgraphics.BGRA {

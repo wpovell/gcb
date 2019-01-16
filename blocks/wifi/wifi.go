@@ -41,12 +41,8 @@ func (w *Wifi) Width() int {
 	return font.MeasureString(w.drawer.Face, w.txt).Ceil()
 }
 
-func timeUntilMin() time.Duration {
-	return time.Now().Truncate(time.Minute).Add(time.Minute).Sub(time.Now())
-}
-
 func (w *Wifi) Start() {
-	w.ticker = time.NewTicker(time.Second * 1)
+	w.ticker = time.NewTicker(time.Second)
 	go func() {
 		for {
 			<-w.ticker.C

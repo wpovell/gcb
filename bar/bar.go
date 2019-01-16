@@ -14,6 +14,7 @@ import (
 	"github.com/BurntSushi/xgbutil/xwindow"
 )
 
+// Block alignment on bar
 type Align int
 
 const (
@@ -37,6 +38,7 @@ type Bar struct {
 	Redraw chan Block
 }
 
+// Create new bar instance
 func Create() *Bar {
 	bar := new(Bar)
 	var err error
