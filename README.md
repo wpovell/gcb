@@ -11,7 +11,6 @@ Inspired by [melonbar](https://github.com/onodera-punpun/melonbar).
 ## TODO
 
 - Add icons to bar
-- Refactor Block interface to reduce code repetition
 - Add themeing
 - Add message system / client
 - Blocks

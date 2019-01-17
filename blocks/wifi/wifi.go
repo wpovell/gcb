@@ -4,55 +4,32 @@ import (
 	"time"
 
 	"gcb/bar"
-	"gcb/text"
+	"gcb/blocks/wrapper"
 
 	"github.com/BurntSushi/xgbutil/xevent"
-	"github.com/BurntSushi/xgbutil/xgraphics"
-	"golang.org/x/image/font"
 )
 
 const (
 	intf = "wlp4s0"
 )
 
-type Wifi struct {
-	bar    *bar.Bar
-	ticker *time.Ticker
-	drawer *font.Drawer
-	txt    string
-}
+type Wifi struct{}
 
-func Create(b *bar.Bar) *Wifi {
-	return &Wifi{
-		bar:    b,
-		ticker: nil,
-		drawer: text.Drawer(),
-	}
+func Create(b *bar.Bar) *wrapper.TextW {
+	return wrapper.CreateTextW(b, &Wifi{})
 }
 
 func (w *Wifi) Handle(ev xevent.ButtonPressEvent) {}
-func (w *Wifi) Draw(x int, img *xgraphics.Image) {
-	w.drawer.Dst = img
-	w.drawer.Dot = text.Point(x)
-	w.drawer.DrawString(w.txt)
+
+func (w *Wifi) Interval() time.Duration {
+	return time.Second
 }
 
-func (w *Wifi) Width() int {
-	return font.MeasureString(w.drawer.Face, w.txt).Ceil()
-}
-
-func (w *Wifi) Start() {
-	w.ticker = time.NewTicker(time.Second)
-	go func() {
-		for {
-			txt, err := ssid(intf)
-			if err != nil {
-				w.txt = "No Wifi"
-			} else {
-				w.txt = txt
-			}
-			w.bar.Redraw <- w
-			<-w.ticker.C
-		}
-	}()
+func (w *Wifi) Text() string {
+	txt, err := ssid(intf)
+	if err != nil {
+		return "No Wifi"
+	} else {
+		return txt
+	}
 }
