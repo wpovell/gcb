@@ -14,8 +14,6 @@ Inspired by [melonbar](https://github.com/onodera-punpun/melonbar).
 - Add themeing
 - Add message system / client
 - Blocks
-  - Finish bat
-  - Music
   - Sound
   - VPN, Lock, Notif
   - i3
