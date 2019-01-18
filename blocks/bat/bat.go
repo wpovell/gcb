@@ -24,9 +24,6 @@ func (b *Bat) Interval() time.Duration {
 
 func (b *Bat) Text() string {
 	bat := info()
-	if bat.state == Charging {
-		return fmt.Sprintf("Charging %d%%", bat.charge)
-	} else {
-		return fmt.Sprintf("Discharging %d%%", bat.charge)
-	}
+
+	return fmt.Sprintf("%s %d%%", bat.state, bat.charge)
 }
