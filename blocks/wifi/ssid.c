@@ -5,7 +5,6 @@
 #include "ssid.h"
 
 char* ssid(char* intr) {
-  return NULL;
   int sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock < 0) {
     return NULL;

@@ -11,6 +11,7 @@ const (
 	FontSize = 12
 	FontDpi  = 72
 	BarH     = 27
+	Padding  = 10
 )
 
 var FG, BG xgraphics.BGRA

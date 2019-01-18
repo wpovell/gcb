@@ -50,7 +50,7 @@ func Create() *Bar {
 	log.Fatal(err)
 
 	scr := X.Screen()
-	scrW, scrH := int(scr.WidthInPixels), int(scr.HeightInPixels)
+	scrW, scrH := 1920, int(scr.HeightInPixels)
 	x, y := 0, scrH-config.BarH
 	w, h := scrW, config.BarH
 

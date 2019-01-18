@@ -60,6 +60,7 @@ func (bar *Bar) draw() {
 		w := block.Width()
 		block.Draw(start, bar.img)
 		start += w
+		start += config.Padding
 	}
 
 	// Right
@@ -69,6 +70,7 @@ func (bar *Bar) draw() {
 		block := bar.blocks[Right][l-i-1]
 		w := block.Width()
 		start -= w
+		start -= config.Padding
 		block.Draw(start, bar.img)
 	}
 
@@ -76,12 +78,14 @@ func (bar *Bar) draw() {
 	var total int
 	for _, block := range bar.blocks[Center] {
 		total += block.Width()
+		total += config.Padding
 	}
 	start = bar.w/2 - total/2
 	for _, block := range bar.blocks[Center] {
 		w := block.Width()
 		block.Draw(start, bar.img)
 		start += w
+		start += config.Padding
 	}
 
 	// Redraw

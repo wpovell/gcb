@@ -34,6 +34,5 @@ func (m *Music) Text() string {
 		m := m.spot.Metadata()
 		ret = fmt.Sprintf("%s %s - %s", ret, m.Artist, m.Title)
 	}
-	println(ret)
 	return ret
 }
