@@ -21,7 +21,16 @@ func Create(b *bar.Bar) *wrapper.TextW {
 	})
 }
 
-func (m *Music) Handle(ev xevent.ButtonPressEvent) {}
+func (m *Music) Handle(ev xevent.ButtonPressEvent) {
+	switch ev.Detail {
+	case bar.LeftClick:
+		m.spot.Toggle()
+	case bar.MiddleClick:
+		m.spot.Prev()
+	case bar.RightClick:
+		m.spot.Next()
+	}
+}
 
 func (m *Music) Interval() time.Duration {
 	return time.Second

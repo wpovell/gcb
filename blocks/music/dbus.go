@@ -22,6 +22,23 @@ func CreateSpotify() *Spotify {
 	}
 }
 
+func (s *Spotify) Call(name string) {
+	c := s.sdbus.Call(fmt.Sprintf("org.mpris.MediaPlayer2.Player.%s", name), 0)
+	log.Fatal(c.Err)
+}
+
+func (s *Spotify) Toggle() {
+	s.Call("PlayPause")
+}
+
+func (s *Spotify) Next() {
+	s.Call("Next")
+}
+
+func (s *Spotify) Prev() {
+	s.Call("Previous")
+}
+
 // Metadata
 func (s *Spotify) Metadata() Metadata {
 	song, err := s.sdbus.GetProperty("org.mpris.MediaPlayer2.Player.Metadata")

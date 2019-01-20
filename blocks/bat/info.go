@@ -16,6 +16,7 @@ const (
 	Charging State = iota
 	Discharging
 	Unknown
+	Full
 	Other
 )
 
@@ -23,6 +24,7 @@ var states = map[State]string{
 	Unknown:     "Unknown",
 	Discharging: "Discharging",
 	Charging:    "Charging",
+	Full:        "Full",
 	Other:       "Other",
 }
 
