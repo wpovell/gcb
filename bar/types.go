@@ -1,6 +1,8 @@
 package bar
 
 import (
+	"sync"
+
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
@@ -27,5 +29,5 @@ type Block interface {
 	// Handle click
 	Handle(ev xevent.ButtonPressEvent)
 	// Start any update loop
-	Start() DrawState
+	Start(wg *sync.WaitGroup) DrawState
 }

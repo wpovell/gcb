@@ -15,7 +15,7 @@ type Music struct {
 	spot *Spotify
 }
 
-func Create(b *bar.Bar) *w.TextW {
+func New(b *bar.Bar) *w.TextW {
 	spot := CreateSpotify()
 	return w.NewTextW(b, &Music{
 		spot: spot,

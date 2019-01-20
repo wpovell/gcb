@@ -1,7 +1,10 @@
 package bar
 
 import (
+	"sync"
+
 	"gcb/config"
+	"gcb/log"
 
 	"github.com/BurntSushi/xgbutil/xgraphics"
 )
@@ -21,28 +24,32 @@ func (bar *Bar) findBlock(x int) Block {
 }
 
 // Loop waiting for redraw requests
-func (bar *Bar) Start() {
-	go func() {
-		// Start blocks
-		for b, _ := range bar.blocks {
-			state := &BlockState{
-				state: b.Start(),
-				start: 0,
-			}
-			bar.blocks[b] = state
+func (bar *Bar) Start(wg *sync.WaitGroup) {
+	// Start blocks
+	for b, _ := range bar.blocks {
+		state := &BlockState{
+			state: b.Start(wg),
+			start: 0,
 		}
+		bar.blocks[b] = state
+	}
 
-		// Handle redraw requests
-		var state DrawState = nil
-		bar.Lock()
-		for {
-			bar.draw()
-			bar.Unlock()
-			state = <-bar.Redraw
-			bar.Lock()
-			bar.blocks[state.Source()].state = state
+	// Handle redraw requests
+	var state DrawState = nil
+	bar.Lock()
+	for {
+		bar.draw()
+		bar.Unlock()
+		select {
+		case state = <-bar.Redraw:
+		case <-bar.Ctx.Done():
+			log.Log("Stopping bar", "stop")
+			wg.Done()
+			return
 		}
-	}()
+		bar.Lock()
+		bar.blocks[state.Source()].state = state
+	}
 }
 
 // Add block to position on bar

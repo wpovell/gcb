@@ -11,7 +11,7 @@ import (
 
 type Time struct{}
 
-func Create(b *bar.Bar) *w.TextW {
+func New(b *bar.Bar) *w.TextW {
 	return w.NewTextW(b, &Time{})
 }
 

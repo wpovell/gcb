@@ -1,11 +1,14 @@
 package wrapper
 
 import (
+	"fmt"
 	"image"
+	"sync"
 	"time"
 
 	"gcb/bar"
 	"gcb/config"
+	"gcb/log"
 	"gcb/text"
 
 	"github.com/BurntSushi/xgbutil/xevent"
@@ -68,10 +71,18 @@ func (t *TextW) createState() *TextWState {
 	return state
 }
 
-func (t *TextW) Start() bar.DrawState {
+func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
+	wg.Add(1)
 	go func() {
 		for {
-			time.Sleep(t.sub.Interval())
+			timer := time.NewTimer(t.sub.Interval())
+			select {
+			case <-timer.C:
+			case <-t.bar.Ctx.Done():
+				log.Log(fmt.Sprintf("Stopping %T\n", t.sub))
+				wg.Done()
+				return
+			}
 			t.bar.Redraw <- t.createState()
 		}
 	}()

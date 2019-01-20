@@ -13,7 +13,7 @@ import (
 
 type Bat struct{}
 
-func Create(b *bar.Bar) *w.TextW {
+func New(b *bar.Bar) *w.TextW {
 	return w.NewTextW(b, &Bat{})
 }
 

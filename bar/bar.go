@@ -1,6 +1,7 @@
 package bar
 
 import (
+	"context"
 	"image"
 	"sync"
 
@@ -37,6 +38,8 @@ type Bar struct {
 	align  [][]Block
 
 	bg, fg xgraphics.BGRA
+
+	Ctx context.Context
 
 	w, h   int
 	x, y   int
@@ -116,8 +119,9 @@ func (b *Bar) xinit() {
 }
 
 // Create new bar instance
-func Create() *Bar {
+func New(ctx context.Context) *Bar {
 	bar := new(Bar)
+	bar.Ctx = ctx
 
 	bar.xinit()
 
