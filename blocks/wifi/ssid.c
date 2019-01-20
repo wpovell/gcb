@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/wireless.h>
+#include <unistd.h>
 #include "ssid.h"
 
 char* ssid(char* intr) {
@@ -17,8 +18,10 @@ char* ssid(char* intr) {
   wreq.u.essid.pointer = essid;
   wreq.u.essid.length = IW_ESSID_MAX_SIZE;
   if (ioctl(sock ,SIOCGIWESSID, &wreq) == -1) {
+    close(sock);
     return NULL;
   }
+  close(sock);
 
   essid[wreq.u.essid.length] = '\0';
   return essid;
