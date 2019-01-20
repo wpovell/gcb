@@ -4,7 +4,8 @@ import (
 	"time"
 
 	"gcb/bar"
-	"gcb/blocks/wrapper"
+	w "gcb/blocks/wrapper"
+	"gcb/config"
 
 	"github.com/BurntSushi/xgbutil/xevent"
 )
@@ -15,21 +16,21 @@ const (
 
 type Wifi struct{}
 
-func Create(b *bar.Bar) *wrapper.TextW {
-	return wrapper.CreateTextW(b, &Wifi{})
+func Create(b *bar.Bar) *w.TextW {
+	return w.NewTextW(b, &Wifi{})
 }
 
-func (w *Wifi) Handle(ev xevent.ButtonPressEvent) {}
+func (wi *Wifi) Handle(ev xevent.ButtonPressEvent) {}
 
-func (w *Wifi) Interval() time.Duration {
+func (wi *Wifi) Interval() time.Duration {
 	return time.Second
 }
 
-func (w *Wifi) Text() string {
+func (wi *Wifi) Text() *w.TextData {
 	txt, err := ssid(intf)
 	if err != nil {
-		return "No Wifi"
+		return w.NewTextData().Text("No Wifi")
 	} else {
-		return txt
+		return w.NewTextData().Color(txt, config.Bright)
 	}
 }

@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"gcb/bar"
-	"gcb/blocks/wrapper"
+	w "gcb/blocks/wrapper"
+	"gcb/config"
 
 	"github.com/BurntSushi/xgbutil/xevent"
 )
@@ -14,9 +15,9 @@ type Music struct {
 	spot *Spotify
 }
 
-func Create(b *bar.Bar) *wrapper.TextW {
+func Create(b *bar.Bar) *w.TextW {
 	spot := CreateSpotify()
-	return wrapper.CreateTextW(b, &Music{
+	return w.NewTextW(b, &Music{
 		spot: spot,
 	})
 }
@@ -36,12 +37,18 @@ func (m *Music) Interval() time.Duration {
 	return time.Second
 }
 
-func (m *Music) Text() string {
+func (m *Music) Text() *w.TextData {
 	status := m.spot.Status()
-	ret := status.String()
+	text := status.String()
 	if status != Quit {
 		m := m.spot.Metadata()
-		ret = fmt.Sprintf("%s %s - %s", ret, m.Artist, m.Title)
+		text = fmt.Sprintf("%s %s - %s", text, m.Artist, m.Title)
 	}
-	return ret
+
+	color := config.FG
+	if status == Playing {
+		color = config.Bright
+	}
+
+	return w.NewTextData().Color(text, color)
 }
