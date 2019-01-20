@@ -9,14 +9,11 @@ import (
 // Return block associated with `x` coordinate
 // Returns nil if no block associated
 func (bar *Bar) findBlock(x int) Block {
-	curX := 0
-	for _, arr := range bar.blocks {
-		for _, block := range arr {
-			w := block.Width()
-			if curX <= x && x <= curX+w {
-				return block
-			}
-			curX += w
+	bar.Lock()
+	defer bar.Unlock()
+	for b, state := range bar.blocks {
+		if state.Contains(x) {
+			return b
 		}
 	}
 
@@ -27,23 +24,31 @@ func (bar *Bar) findBlock(x int) Block {
 func (bar *Bar) Start() {
 	go func() {
 		// Start blocks
-		for _, arr := range bar.blocks {
-			for _, block := range arr {
-				block.Start()
+		for b, _ := range bar.blocks {
+			state := &BlockState{
+				state: b.Start(),
+				start: 0,
 			}
+			bar.blocks[b] = state
 		}
 
 		// Handle redraw requests
+		var state DrawState = nil
+		bar.Lock()
 		for {
-			<-bar.Redraw
 			bar.draw()
+			bar.Unlock()
+			state = <-bar.Redraw
+			bar.Lock()
+			bar.blocks[state.Source()].state = state
 		}
 	}()
 }
 
 // Add block to position on bar
-func (bar *Bar) AddBlock(pos Align, blk Block) {
-	bar.blocks[pos] = append(bar.blocks[pos], blk)
+func (bar *Bar) AddBlock(aln Align, blk Block) {
+	bar.blocks[blk] = nil
+	bar.align[aln] = append(bar.align[aln], blk)
 }
 
 // Draw entire bar
@@ -55,36 +60,37 @@ func (bar *Bar) draw() {
 
 	var start int
 	// Left
-	start = 0
-	for _, block := range bar.blocks[Left] {
-		w := block.Width()
-		block.Draw(start, bar.img)
-		start += w
+	posn := config.Padding
+	for _, block := range bar.align[Left] {
+		bs := bar.blocks[block]
+		bs.Draw(posn, bar.img)
+		start += bs.state.Width()
 		start += config.Padding
 	}
 
 	// Right
-	l := len(bar.blocks[Right])
-	start = bar.w
-	for i := range bar.blocks[Right] {
-		block := bar.blocks[Right][l-i-1]
-		w := block.Width()
-		start -= w
-		start -= config.Padding
-		block.Draw(start, bar.img)
+	l := len(bar.align[Right])
+	posn = bar.w
+	for i := range bar.align[Right] {
+		block := bar.align[Right][l-i-1]
+		bs := bar.blocks[block]
+		posn -= bs.state.Width()
+		posn -= config.Padding
+		bs.Draw(posn, bar.img)
 	}
 
 	// Center
 	var total int
-	for _, block := range bar.blocks[Center] {
-		total += block.Width()
+	for _, block := range bar.align[Center] {
+		bs := bar.blocks[block]
+		total += bs.state.Width()
 		total += config.Padding
 	}
 	start = bar.w/2 - total/2
-	for _, block := range bar.blocks[Center] {
-		w := block.Width()
-		block.Draw(start, bar.img)
-		start += w
+	for _, block := range bar.align[Center] {
+		bs := bar.blocks[block]
+		bs.Draw(start, bar.img)
+		start += bs.state.Width()
 		start += config.Padding
 	}
 

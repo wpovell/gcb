@@ -2,6 +2,7 @@ package bar
 
 import (
 	"image"
+	"sync"
 
 	"gcb/config"
 	"gcb/log"
@@ -24,40 +25,64 @@ const (
 )
 
 type Bar struct {
+	sync.Mutex
+
 	// Graphics
 	X   *xgbutil.XUtil
 	win *xwindow.Window
 	img *xgraphics.Image
 
 	// Block lists
-	blocks [][]Block
+	blocks map[Block]*BlockState
+	align  [][]Block
 
 	bg, fg xgraphics.BGRA
 
 	w, h   int
-	Redraw chan Block
+	x, y   int
+	Redraw chan DrawState
 }
 
-// Create new bar instance
-func Create() *Bar {
-	bar := new(Bar)
+// Current data and placement of a displayed block
+type BlockState struct {
+	state DrawState
+	start int
+}
+
+func (s *BlockState) Contains(x int) bool {
+	return s.start < x && x < s.start+s.state.Width()
+}
+
+func (s *BlockState) Draw(x int, img *xgraphics.Image) {
+	s.start = x
+	s.state.Draw(x, img)
+}
+
+// Initialize X stuff
+func (b *Bar) xinit() {
+	// New connection to X server
 	var err error
+	X, err := xgbutil.NewConn()
+	log.Fatal(err)
+	b.X = X
 
-	X := initX()
-	bar.X = X
+	// Main X event loop
+	go xevent.Main(X)
 
-	bar.win, err = xwindow.Generate(X)
+	// Create X window
+	b.win, err = xwindow.Generate(X)
 	log.Fatal(err)
 
+	// Calculate dimensions
 	scr := X.Screen()
 	scrW, scrH := 1920, int(scr.HeightInPixels)
-	x, y := 0, scrH-config.BarH
-	w, h := scrW, config.BarH
+	b.x, b.y = 0, scrH-config.BarH
+	b.w, b.h = scrW, config.BarH
 
 	// Bar window
-	bar.win.Create(
+	b.win.Create(
 		X.RootWin(),
-		x, y, w, h,
+		b.x, b.y, b.w, b.h,
 		xproto.CwBackPixel|xproto.CwEventMask,
 		0x000000,
 		xproto.EventMaskButtonPress,
@@ -65,43 +90,51 @@ func Create() *Bar {
 	log.Fatal(err)
 
 	// EWMH
-	err = ewmh.WmWindowTypeSet(X, bar.win.Id,
+	err = ewmh.WmWindowTypeSet(X, b.win.Id,
 		[]string{"_NET_WM_WINDOW_TYPE_DOCK"})
 	log.Fatal(err)
 
-	err = ewmh.WmStateSet(X, bar.win.Id,
+	err = ewmh.WmStateSet(X, b.win.Id,
 		[]string{"_NET_WM_STATE_STICKY"})
 	log.Fatal(err)
 
-	err = ewmh.WmDesktopSet(X, bar.win.Id, ^uint(0))
+	err = ewmh.WmDesktopSet(X, b.win.Id, ^uint(0))
 	log.Fatal(err)
 
-	err = ewmh.WmNameSet(X, bar.win.Id, "bar")
+	err = ewmh.WmNameSet(X, b.win.Id, "bar")
 	log.Fatal(err)
 
 	// Map
-	bar.win.Map()
-	bar.win.Move(x, y)
+	b.win.Map()
+	b.win.Move(b.x, b.y)
 
 	// Image
-	bar.img = xgraphics.New(X, image.Rect(0, 0, w, h))
-	err = bar.img.XSurfaceSet(bar.win.Id)
+	b.img = xgraphics.New(X, image.Rect(0, 0, b.w, b.h))
+	err = b.img.XSurfaceSet(b.win.Id)
 	log.Fatal(err)
-	bar.img.XDraw()
+	b.img.XDraw()
+}
 
-	bar.w = w
-	bar.h = h
+// Create new bar instance
+func Create() *Bar {
+	bar := new(Bar)
 
-	bar.Redraw = make(chan Block)
-	bar.blocks = make([][]Block, 3)
+	bar.xinit()
+
+	bar.Redraw = make(chan DrawState)
+	bar.blocks = make(map[Block]*BlockState)
+	bar.align = make([][]Block, 3)
 	for i := 0; i < 3; i++ {
-		bar.blocks[i] = make([]Block, 0)
+		bar.align[i] = make([]Block, 0)
 	}
 
 	// Event handler
 	xevent.ButtonPressFun(func(_ *xgbutil.XUtil, ev xevent.ButtonPressEvent) {
-		bar.findBlock(int(ev.EventX)).Handle(ev)
-	}).Connect(X, bar.win.Id)
+		block := bar.findBlock(int(ev.EventX))
+		if block != nil {
+			block.Handle(ev)
+		}
+	}).Connect(bar.X, bar.win.Id)
 
 	return bar
 }
