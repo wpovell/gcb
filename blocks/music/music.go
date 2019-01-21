@@ -9,6 +9,10 @@ import (
 	"gcb/config"
 )
 
+const (
+	iconMusic = ""
+)
+
 type Music struct {
 	w.NoMsg
 	spot *Spotify
@@ -40,10 +44,11 @@ func (m *Music) Interval() time.Duration {
 
 func (m *Music) Text() *w.TextData {
 	status := m.spot.Status()
-	text := status.String()
+
+	text := iconMusic
 	if status != Quit {
 		m := m.spot.Metadata()
-		text = fmt.Sprintf("%s %s - %s", text, m.Artist, m.Title)
+		text = fmt.Sprintf("%s %s - %s", iconMusic, m.Artist, m.Title)
 	}
 
 	color := config.FG

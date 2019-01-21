@@ -1,6 +1,7 @@
 package wifi
 
 import (
+	"fmt"
 	"time"
 
 	"gcb/bar"
@@ -10,6 +11,11 @@ import (
 
 const (
 	intf = "wlp4s0"
+)
+
+const (
+	iconWifi   = "直"
+	iconNoWifi = "睊"
 )
 
 type Wifi struct {
@@ -27,8 +33,8 @@ func (wi *Wifi) Interval() time.Duration {
 func (wi *Wifi) Text() *w.TextData {
 	txt, err := ssid(intf)
 	if err != nil {
-		return w.NewTextData().Text("No Wifi")
+		return w.NewTextData().Text(iconNoWifi)
 	} else {
-		return w.NewTextData().Color(txt, config.Bright)
+		return w.NewTextData().Color(fmt.Sprintf("%s %s", iconWifi, txt), config.Bright)
 	}
 }

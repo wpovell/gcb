@@ -12,6 +12,7 @@ import (
 	"github.com/BurntSushi/xgbutil/ewmh"
 	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
+	"github.com/BurntSushi/xgbutil/xinerama"
 	"github.com/BurntSushi/xgbutil/xwindow"
 )
 
@@ -81,9 +82,11 @@ func (b *Bar) xinit() {
 	log.Fatal(err)
 
 	// Calculate dimensions
-	scr := X.Screen()
-	scrW, scrH := 1920, int(scr.HeightInPixels)
-	b.x, b.y = 0, scrH-config.BarH
+	heads, err := xinerama.PhysicalHeads(X)
+	log.Fatal(err)
+	rect := heads[0]
+	scrW, scrH := rect.Width(), rect.Height()
+	b.x, b.y = rect.X(), rect.Y()+scrH-config.BarH
 	b.w, b.h = scrW, config.BarH
 
 	// Bar window

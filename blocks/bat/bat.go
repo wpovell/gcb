@@ -9,6 +9,14 @@ import (
 	"gcb/config"
 )
 
+var iconBat = []string{
+	"",
+	"",
+	"",
+	"",
+	"",
+}
+
 type Bat struct {
 	w.NoHandle
 }
@@ -27,8 +35,11 @@ func (b *Bat) Text() *w.TextData {
 	color := config.FG
 	if bat.state == Full || bat.state == Charging {
 		color = config.Bright
+	} else if bat.charge <= 10 {
+		color = config.Red
 	}
 
-	text := fmt.Sprintf("%d%%", bat.charge)
+	ind := int(float64(bat.charge) / 100.0 * float64(len(iconBat)-1))
+	text := fmt.Sprintf("%s %d%%", iconBat[ind], bat.charge)
 	return w.NewTextData().Color(text, color)
 }
