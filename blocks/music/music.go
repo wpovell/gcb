@@ -7,11 +7,10 @@ import (
 	"gcb/bar"
 	w "gcb/blocks/wrapper"
 	"gcb/config"
-
-	"github.com/BurntSushi/xgbutil/xevent"
 )
 
 type Music struct {
+	w.NoMsg
 	spot *Spotify
 }
 
@@ -22,8 +21,8 @@ func New(b *bar.Bar) *w.TextW {
 	})
 }
 
-func (m *Music) Handle(ev xevent.ButtonPressEvent) {
-	switch ev.Detail {
+func (m *Music) HandleClick(ev bar.ClickEvent) {
+	switch ev.Button {
 	case bar.LeftClick:
 		m.spot.Toggle()
 	case bar.MiddleClick:

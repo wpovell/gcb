@@ -3,7 +3,6 @@ package bar
 import (
 	"context"
 	"image"
-	"sync"
 
 	"gcb/config"
 	"gcb/log"
@@ -16,6 +15,15 @@ import (
 	"github.com/BurntSushi/xgbutil/xwindow"
 )
 
+type ClickEvent struct {
+	Button xproto.Button
+	X, Y   int
+}
+
+type MsgEvent struct {
+	Msg string
+}
+
 // Block alignment on bar
 type Align int
 
@@ -26,8 +34,6 @@ const (
 )
 
 type Bar struct {
-	sync.Mutex
-
 	// Graphics
 	X   *xgbutil.XUtil
 	win *xwindow.Window
@@ -44,6 +50,7 @@ type Bar struct {
 	w, h   int
 	x, y   int
 	Redraw chan DrawState
+	xevent chan xevent.ButtonPressEvent
 }
 
 // Current data and placement of a displayed block
@@ -126,6 +133,7 @@ func New(ctx context.Context) *Bar {
 	bar.xinit()
 
 	bar.Redraw = make(chan DrawState)
+	bar.xevent = make(chan xevent.ButtonPressEvent)
 	bar.blocks = make(map[Block]*BlockState)
 	bar.align = make([][]Block, 3)
 	for i := 0; i < 3; i++ {
@@ -134,10 +142,7 @@ func New(ctx context.Context) *Bar {
 
 	// Event handler
 	xevent.ButtonPressFun(func(_ *xgbutil.XUtil, ev xevent.ButtonPressEvent) {
-		block := bar.findBlock(int(ev.EventX))
-		if block != nil {
-			block.Handle(ev)
-		}
+		bar.xevent <- ev
 	}).Connect(bar.X, bar.win.Id)
 
 	return bar

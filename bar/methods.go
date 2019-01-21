@@ -12,8 +12,6 @@ import (
 // Return block associated with `x` coordinate
 // Returns nil if no block associated
 func (bar *Bar) findBlock(x int) Block {
-	bar.Lock()
-	defer bar.Unlock()
 	for b, state := range bar.blocks {
 		if state.Contains(x) {
 			return b
@@ -35,20 +33,24 @@ func (bar *Bar) Start(wg *sync.WaitGroup) {
 	}
 
 	// Handle redraw requests
-	var state DrawState = nil
-	bar.Lock()
+	bar.draw()
 	for {
-		bar.draw()
-		bar.Unlock()
 		select {
-		case state = <-bar.Redraw:
+		case ev := <-bar.xevent:
+			block := bar.findBlock(int(ev.EventX))
+			block.EventCh() <- ClickEvent{
+				Button: ev.Detail,
+				X:      int(ev.EventX),
+				Y:      int(ev.EventY),
+			}
+		case state := <-bar.Redraw:
+			bar.blocks[state.Source()].state = state
+			bar.draw()
 		case <-bar.Ctx.Done():
 			log.Log("Stopping bar", "stop")
 			wg.Done()
 			return
 		}
-		bar.Lock()
-		bar.blocks[state.Source()].state = state
 	}
 }
 

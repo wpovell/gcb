@@ -11,7 +11,6 @@ import (
 	"gcb/log"
 	"gcb/text"
 
-	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
 	"golang.org/x/image/font"
 )
@@ -43,18 +42,21 @@ func (t *TextData) Text(txt string) *TextData {
 type TextBlock interface {
 	Interval() time.Duration
 	Text() *TextData
-	Handle(ev xevent.ButtonPressEvent)
+	HandleClick(e bar.ClickEvent)
+	HandleMsg(m bar.MsgEvent)
 }
 
 type TextW struct {
-	bar *bar.Bar
-	sub TextBlock
+	bar    *bar.Bar
+	sub    TextBlock
+	events chan interface{}
 }
 
 func NewTextW(b *bar.Bar, sub TextBlock) *TextW {
 	return &TextW{
-		bar: b,
-		sub: sub,
+		bar:    b,
+		sub:    sub,
+		events: make(chan interface{}),
 	}
 }
 
@@ -71,26 +73,38 @@ func (t *TextW) createState() *TextWState {
 	return state
 }
 
+func (t *TextW) EventCh() chan interface{} {
+	return t.events
+}
+
 func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
 	wg.Add(1)
 	go func() {
+		timer := time.NewTimer(t.sub.Interval())
 		for {
-			timer := time.NewTimer(t.sub.Interval())
 			select {
+			case ev := <-t.events:
+				t.handle(ev)
 			case <-timer.C:
+				t.bar.Redraw <- t.createState()
+				timer = time.NewTimer(t.sub.Interval())
 			case <-t.bar.Ctx.Done():
 				log.Log(fmt.Sprintf("Stopping %T\n", t.sub))
 				wg.Done()
 				return
 			}
-			t.bar.Redraw <- t.createState()
 		}
 	}()
 	return t.createState()
 }
 
-func (t *TextW) Handle(ev xevent.ButtonPressEvent) {
-	t.sub.Handle(ev)
+func (t *TextW) handle(ev interface{}) {
+	switch ev.(type) {
+	case bar.ClickEvent:
+		t.sub.HandleClick(ev.(bar.ClickEvent))
+	case bar.MsgEvent:
+		t.sub.HandleMsg(ev.(bar.MsgEvent))
+	}
 }
 
 type TextWState struct {

@@ -5,17 +5,15 @@ import (
 
 	"gcb/bar"
 	w "gcb/blocks/wrapper"
-
-	"github.com/BurntSushi/xgbutil/xevent"
 )
 
-type Time struct{}
-
-func New(b *bar.Bar) *w.TextW {
-	return w.NewTextW(b, &Time{})
+type Time struct {
+	w.NoHandle
 }
 
-func (t *Time) Handle(ev xevent.ButtonPressEvent) {}
+func New(b *bar.Bar) *w.TextW {
+	return w.NewTextW(b, new(Time))
+}
 
 func (t *Time) Interval() time.Duration {
 	return time.Now().Truncate(time.Minute).Add(time.Minute).Sub(time.Now())

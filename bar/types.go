@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/BurntSushi/xgb/xproto"
-	"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
 )
 
@@ -26,8 +25,8 @@ type DrawState interface {
 
 // Blocks handle events and send DrawState to bar as necessary
 type Block interface {
-	// Handle click
-	Handle(ev xevent.ButtonPressEvent)
+	// Handle events
+	EventCh() chan interface{}
 	// Start any update loop
 	Start(wg *sync.WaitGroup) DrawState
 }

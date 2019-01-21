@@ -6,21 +6,19 @@ import (
 	"gcb/bar"
 	w "gcb/blocks/wrapper"
 	"gcb/config"
-
-	"github.com/BurntSushi/xgbutil/xevent"
 )
 
 const (
 	intf = "wlp4s0"
 )
 
-type Wifi struct{}
-
-func New(b *bar.Bar) *w.TextW {
-	return w.NewTextW(b, &Wifi{})
+type Wifi struct {
+	w.NoHandle
 }
 
-func (wi *Wifi) Handle(ev xevent.ButtonPressEvent) {}
+func New(b *bar.Bar) *w.TextW {
+	return w.NewTextW(b, new(Wifi))
+}
 
 func (wi *Wifi) Interval() time.Duration {
 	return time.Second

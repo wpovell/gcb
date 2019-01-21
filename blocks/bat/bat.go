@@ -7,17 +7,15 @@ import (
 	"gcb/bar"
 	w "gcb/blocks/wrapper"
 	"gcb/config"
-
-	"github.com/BurntSushi/xgbutil/xevent"
 )
 
-type Bat struct{}
-
-func New(b *bar.Bar) *w.TextW {
-	return w.NewTextW(b, &Bat{})
+type Bat struct {
+	w.NoHandle
 }
 
-func (b *Bat) Handle(ev xevent.ButtonPressEvent) {}
+func New(b *bar.Bar) *w.TextW {
+	return w.NewTextW(b, new(Bat))
+}
 
 func (b *Bat) Interval() time.Duration {
 	return time.Second
