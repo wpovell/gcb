@@ -2,44 +2,18 @@ package wrapper
 
 import (
 	"fmt"
-	"image"
 	"sync"
 	"time"
 
 	"gcb/bar"
-	"gcb/config"
 	"gcb/ipc"
 	"gcb/log"
 	"gcb/text"
 
-	"github.com/BurntSushi/xgbutil/xgraphics"
 	"golang.org/x/image/font"
 )
 
-type TextData struct {
-	text  []string
-	color []xgraphics.BGRA
-}
-
-func NewTextData() *TextData {
-	return &TextData{
-		text:  make([]string, 0),
-		color: make([]xgraphics.BGRA, 0),
-	}
-}
-
-func (t *TextData) Color(txt string, color xgraphics.BGRA) *TextData {
-	t.text = append(t.text, txt)
-	t.color = append(t.color, color)
-	return t
-}
-
-func (t *TextData) Text(txt string) *TextData {
-	t.text = append(t.text, txt)
-	t.color = append(t.color, config.FG)
-	return t
-}
-
+// Interface implemented by wrapped blocks
 type TextBlock interface {
 	Interval() time.Duration
 	Text() *TextData
@@ -47,6 +21,7 @@ type TextBlock interface {
 	HandleMsg(m ipc.MsgEvent) bool
 }
 
+// Block wrapper
 type TextW struct {
 	bar    *bar.Bar
 	sub    TextBlock
@@ -61,6 +36,7 @@ func NewTextW(b *bar.Bar, sub TextBlock) *TextW {
 	}
 }
 
+// Create a object for current state to pass to bar
 func (t *TextW) createState() *TextWState {
 	state := &TextWState{
 		txt:    t.sub.Text(),
@@ -68,16 +44,19 @@ func (t *TextW) createState() *TextWState {
 		drawer: text.Drawer(),
 	}
 
+	// Calculate width
 	for _, txt := range state.txt.text {
 		state.width += font.MeasureString(state.drawer.Face, txt).Ceil()
 	}
 	return state
 }
 
+// Return channel which bar/ipc will pass events to
 func (t *TextW) EventCh() chan interface{} {
 	return t.events
 }
 
+// Block update loop
 func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
 	wg.Add(1)
 	go func() {
@@ -85,13 +64,16 @@ func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
 		for {
 			select {
 			case ev := <-t.events:
+				// Event
 				if t.handle(ev) {
 					t.bar.Redraw <- t.createState()
 				}
 			case <-timer.C:
+				// Update
 				t.bar.Redraw <- t.createState()
 				timer = time.NewTimer(t.sub.Interval())
 			case <-t.bar.Ctx.Done():
+				// Done
 				log.Log(fmt.Sprintf("Stopping %T\n", t.sub))
 				wg.Done()
 				return
@@ -101,6 +83,7 @@ func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
 	return t.createState()
 }
 
+// Handle an event recieved, passing to wrapped struct
 func (t *TextW) handle(ev interface{}) bool {
 	switch ev.(type) {
 	case bar.ClickEvent:
@@ -109,30 +92,4 @@ func (t *TextW) handle(ev interface{}) bool {
 		return t.sub.HandleMsg(ev.(ipc.MsgEvent))
 	}
 	panic("Bad event type")
-}
-
-type TextWState struct {
-	txt    *TextData
-	width  int
-	block  *TextW
-	drawer *font.Drawer
-}
-
-func (s *TextWState) Source() bar.Block {
-	return s.block
-}
-
-func (s *TextWState) Width() int {
-	return s.width
-}
-
-func (s *TextWState) Draw(x int, img *xgraphics.Image) {
-	s.drawer.Dst = img
-	s.drawer.Dot = text.Point(x)
-
-	for i, text := range s.txt.text {
-		color := s.txt.color[i]
-		s.drawer.Src = image.NewUniform(color)
-		s.drawer.DrawString(text)
-	}
 }

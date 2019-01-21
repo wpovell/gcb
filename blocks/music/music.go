@@ -19,7 +19,7 @@ type Music struct {
 }
 
 func New(b *bar.Bar) *w.TextW {
-	spot := CreateSpotify()
+	spot := NewSpotify()
 	return w.NewTextW(b, &Music{
 		spot: spot,
 	})

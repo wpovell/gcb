@@ -6,8 +6,6 @@
 #include <unistd.h>
 #include "ssid.h"
 
-#include <stdio.h>
-
 // Returns true if `intr` is up and running
 int link_up(char *intr) {
     int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);

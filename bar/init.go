@@ -16,20 +16,6 @@ import (
 	"github.com/BurntSushi/xgbutil/xwindow"
 )
 
-type ClickEvent struct {
-	Button xproto.Button
-	X, Y   int
-}
-
-// Block alignment on bar
-type Align int
-
-const (
-	Left   Align = 0
-	Center Align = 1
-	Right  Align = 2
-)
-
 type Bar struct {
 	// Graphics
 	X   *xgbutil.XUtil
@@ -51,19 +37,28 @@ type Bar struct {
 	xevent chan xevent.ButtonPressEvent
 }
 
-// Current data and placement of a displayed block
-type BlockState struct {
-	state DrawState
-	start int
-}
+// Create new bar instance
+func New(ctx context.Context) *Bar {
+	bar := new(Bar)
+	bar.Ctx = ctx
 
-func (s *BlockState) Contains(x int) bool {
-	return s.start < x && x < s.start+s.state.Width()
-}
+	bar.xinit()
 
-func (s *BlockState) Draw(x int, img *xgraphics.Image) {
-	s.start = x
-	s.state.Draw(x, img)
+	bar.Redraw = make(chan DrawState)
+	bar.xevent = make(chan xevent.ButtonPressEvent)
+	bar.blocks = make(map[Block]*BlockState)
+	bar.Names = make(map[string]Block)
+	bar.align = make([][]Block, 3)
+	for i := 0; i < 3; i++ {
+		bar.align[i] = make([]Block, 0)
+	}
+
+	// Event handler
+	xevent.ButtonPressFun(func(_ *xgbutil.XUtil, ev xevent.ButtonPressEvent) {
+		bar.xevent <- ev
+	}).Connect(bar.X, bar.win.Id)
+
+	return bar
 }
 
 // Initialize X stuff
@@ -123,28 +118,4 @@ func (b *Bar) xinit() {
 	err = b.img.XSurfaceSet(b.win.Id)
 	log.Fatal(err)
 	b.img.XDraw()
-}
-
-// Create new bar instance
-func New(ctx context.Context) *Bar {
-	bar := new(Bar)
-	bar.Ctx = ctx
-
-	bar.xinit()
-
-	bar.Redraw = make(chan DrawState)
-	bar.xevent = make(chan xevent.ButtonPressEvent)
-	bar.blocks = make(map[Block]*BlockState)
-	bar.Names = make(map[string]Block)
-	bar.align = make([][]Block, 3)
-	for i := 0; i < 3; i++ {
-		bar.align[i] = make([]Block, 0)
-	}
-
-	// Event handler
-	xevent.ButtonPressFun(func(_ *xgbutil.XUtil, ev xevent.ButtonPressEvent) {
-		bar.xevent <- ev
-	}).Connect(bar.X, bar.win.Id)
-
-	return bar
 }

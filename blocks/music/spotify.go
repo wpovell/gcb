@@ -9,11 +9,13 @@ import (
 	"github.com/godbus/dbus"
 )
 
+// Connection to Spotify DBus
 type Spotify struct {
 	sdbus dbus.BusObject
 }
 
-func CreateSpotify() *Spotify {
+// Connect to Spotify DBus
+func NewSpotify() *Spotify {
 	conn, err := dbus.SessionBus()
 	log.Fatal(err)
 	obj := conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2")
@@ -22,6 +24,7 @@ func CreateSpotify() *Spotify {
 	}
 }
 
+// Call a method
 func (s *Spotify) Call(name string) {
 	c := s.sdbus.Call(fmt.Sprintf("org.mpris.MediaPlayer2.Player.%s", name), 0)
 	log.Fatal(c.Err)
@@ -39,7 +42,7 @@ func (s *Spotify) Prev() {
 	s.Call("Previous")
 }
 
-// Metadata
+// Metadata for currently playing song
 func (s *Spotify) Metadata() Metadata {
 	song, err := s.sdbus.GetProperty("org.mpris.MediaPlayer2.Player.Metadata")
 	log.Fatal(err)
@@ -58,7 +61,7 @@ type Metadata struct {
 	Title  string
 }
 
-// Status
+// Current play status
 func (s *Spotify) Status() Status {
 	raw_status, err := s.sdbus.GetProperty("org.mpris.MediaPlayer2.Player.PlaybackStatus")
 	if err != nil {

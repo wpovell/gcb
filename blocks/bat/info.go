@@ -10,17 +10,24 @@ import (
 	"gcb/log"
 )
 
-type State int
+var bat_path string
+
+func init() {
+	bat_path = fmt.Sprintf("/sys/class/power_supply/%s", BAT_NAME)
+}
+
+// Possible battery states
+type Status int
 
 const (
-	Charging State = iota
+	Charging Status = iota
 	Discharging
 	Unknown
 	Full
 	Other
 )
 
-var states = map[State]string{
+var states = map[Status]string{
 	Unknown:     "Unknown",
 	Discharging: "Discharging",
 	Charging:    "Charging",
@@ -28,7 +35,7 @@ var states = map[State]string{
 	Other:       "Other",
 }
 
-func (s State) String() string {
+func (s Status) String() string {
 	res := states[s]
 	if res != "" {
 		return res
@@ -37,29 +44,10 @@ func (s State) String() string {
 	}
 }
 
+// Default battery to report
 const BAT_NAME = "BAT0"
 
-type BatInfo struct {
-	state  State
-	charge int
-}
-
-var bat_path string
-
-func init() {
-	bat_path = fmt.Sprintf("/sys/class/power_supply/%s", BAT_NAME)
-}
-
-func info() BatInfo {
-	cur_charge, err := charge()
-	log.Fatal(err)
-
-	return BatInfo{
-		state:  state(),
-		charge: cur_charge,
-	}
-}
-
+// Read int from file
 func readInt(fn string) (int, error) {
 	raw, err := ioutil.ReadFile(fn)
 	if err != nil {
@@ -70,15 +58,20 @@ func readInt(fn string) (int, error) {
 	return int(i), err
 }
 
+// Join `f` to base battery path
 func path(f string) string {
 	return filepath.Join(bat_path, f)
 }
 
+// Get the charge of the battery
 func charge() (int, error) {
+	// Now
 	now, err := readInt(path("energy_now"))
 	if err != nil {
 		return 0, err
 	}
+
+	// Full
 	full, err := readInt(path("energy_full"))
 	if err != nil {
 		return 0, err
@@ -86,7 +79,8 @@ func charge() (int, error) {
 	return 100 * now / full, nil
 }
 
-func state() State {
+// Get status of battery
+func status() Status {
 	raw, err := ioutil.ReadFile(filepath.Join(bat_path, "status"))
 	if err != nil {
 		return Unknown
@@ -95,9 +89,25 @@ func state() State {
 
 	for i, state := range states {
 		if strings.EqualFold(dat, state) {
-			return State(i)
+			return Status(i)
 		}
 	}
 
 	return Other
+}
+
+// Combined charge and status information
+type BatInfo struct {
+	status Status
+	charge int
+}
+
+func info() BatInfo {
+	cur_charge, err := charge()
+	log.Fatal(err)
+
+	return BatInfo{
+		status: status(),
+		charge: cur_charge,
+	}
 }

@@ -33,9 +33,10 @@ func (b *Bat) Text() *w.TextData {
 	bat := info()
 
 	color := config.FG
-	if bat.state == Full || bat.state == Charging {
+	if bat.status == Full || bat.status == Charging {
 		color = config.Bright
 	} else if bat.charge <= 10 {
+		// Turn red if below 10%
 		color = config.Red
 	}
 

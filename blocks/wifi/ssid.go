@@ -7,6 +7,8 @@ import (
 	"unsafe"
 )
 
+// Get current SSID for interface
+// Returns an error if interface is down or if err occurs
 func ssid(intf string) (string, error) {
 	// Convert interface to CString
 	cIntf := C.CString(intf)
