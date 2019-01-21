@@ -42,8 +42,8 @@ func (t *TextData) Text(txt string) *TextData {
 type TextBlock interface {
 	Interval() time.Duration
 	Text() *TextData
-	HandleClick(e bar.ClickEvent)
-	HandleMsg(m bar.MsgEvent)
+	HandleClick(e bar.ClickEvent) bool
+	HandleMsg(m bar.MsgEvent) bool
 }
 
 type TextW struct {
@@ -84,7 +84,9 @@ func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
 		for {
 			select {
 			case ev := <-t.events:
-				t.handle(ev)
+				if t.handle(ev) {
+					t.bar.Redraw <- t.createState()
+				}
 			case <-timer.C:
 				t.bar.Redraw <- t.createState()
 				timer = time.NewTimer(t.sub.Interval())
@@ -98,13 +100,14 @@ func (t *TextW) Start(wg *sync.WaitGroup) bar.DrawState {
 	return t.createState()
 }
 
-func (t *TextW) handle(ev interface{}) {
+func (t *TextW) handle(ev interface{}) bool {
 	switch ev.(type) {
 	case bar.ClickEvent:
-		t.sub.HandleClick(ev.(bar.ClickEvent))
+		return t.sub.HandleClick(ev.(bar.ClickEvent))
 	case bar.MsgEvent:
-		t.sub.HandleMsg(ev.(bar.MsgEvent))
+		return t.sub.HandleMsg(ev.(bar.MsgEvent))
 	}
+	panic("Bad event type")
 }
 
 type TextWState struct {

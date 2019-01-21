@@ -21,7 +21,7 @@ func New(b *bar.Bar) *w.TextW {
 	})
 }
 
-func (m *Music) HandleClick(ev bar.ClickEvent) {
+func (m *Music) HandleClick(ev bar.ClickEvent) bool {
 	switch ev.Button {
 	case bar.LeftClick:
 		m.spot.Toggle()
@@ -30,6 +30,8 @@ func (m *Music) HandleClick(ev bar.ClickEvent) {
 	case bar.RightClick:
 		m.spot.Next()
 	}
+
+	return true
 }
 
 func (m *Music) Interval() time.Duration {

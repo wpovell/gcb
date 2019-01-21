@@ -11,8 +11,8 @@ type NoHandle struct {
 
 type NoClick struct{}
 
-func (n *NoClick) HandleClick(ev bar.ClickEvent) {}
+func (n *NoClick) HandleClick(ev bar.ClickEvent) bool { return false }
 
 type NoMsg struct{}
 
-func (n *NoMsg) HandleMsg(ev bar.MsgEvent) {}
+func (n *NoMsg) HandleMsg(ev bar.MsgEvent) bool { return false }
