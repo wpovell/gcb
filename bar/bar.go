@@ -20,10 +20,6 @@ type ClickEvent struct {
 	X, Y   int
 }
 
-type MsgEvent struct {
-	Msg string
-}
-
 // Block alignment on bar
 type Align int
 
@@ -42,6 +38,7 @@ type Bar struct {
 	// Block lists
 	blocks map[Block]*BlockState
 	align  [][]Block
+	Names  map[string]Block
 
 	bg, fg xgraphics.BGRA
 
@@ -135,6 +132,7 @@ func New(ctx context.Context) *Bar {
 	bar.Redraw = make(chan DrawState)
 	bar.xevent = make(chan xevent.ButtonPressEvent)
 	bar.blocks = make(map[Block]*BlockState)
+	bar.Names = make(map[string]Block)
 	bar.align = make([][]Block, 3)
 	for i := 0; i < 3; i++ {
 		bar.align[i] = make([]Block, 0)

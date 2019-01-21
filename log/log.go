@@ -5,12 +5,14 @@ import (
 )
 
 // Disable logging entirely
-const disable = true
+const disable = false
 
 // Enable specific tags
 var enabled_tags = map[string]bool{
 	"stop": false,
 	"draw": false,
+	"warn": true,
+	"ipc":  false,
 }
 
 // Log and panic if an error

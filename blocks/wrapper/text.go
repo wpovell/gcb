@@ -8,6 +8,7 @@ import (
 
 	"gcb/bar"
 	"gcb/config"
+	"gcb/ipc"
 	"gcb/log"
 	"gcb/text"
 
@@ -43,7 +44,7 @@ type TextBlock interface {
 	Interval() time.Duration
 	Text() *TextData
 	HandleClick(e bar.ClickEvent) bool
-	HandleMsg(m bar.MsgEvent) bool
+	HandleMsg(m ipc.MsgEvent) bool
 }
 
 type TextW struct {
@@ -104,8 +105,8 @@ func (t *TextW) handle(ev interface{}) bool {
 	switch ev.(type) {
 	case bar.ClickEvent:
 		return t.sub.HandleClick(ev.(bar.ClickEvent))
-	case bar.MsgEvent:
-		return t.sub.HandleMsg(ev.(bar.MsgEvent))
+	case ipc.MsgEvent:
+		return t.sub.HandleMsg(ev.(ipc.MsgEvent))
 	}
 	panic("Bad event type")
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/BurntSushi/xgbutil/xgraphics"
 )
 
+// Convert 6 character hex string to BGRA
 func HexToBGRA(h string) xgraphics.BGRA {
 	h = strings.Replace(h, "#", "", 1)
 	d, err := hex.DecodeString(h)

@@ -55,9 +55,10 @@ func (bar *Bar) Start(wg *sync.WaitGroup) {
 }
 
 // Add block to position on bar
-func (bar *Bar) AddBlock(aln Align, blk Block) {
+func (bar *Bar) AddBlock(aln Align, blk Block, name string) {
 	bar.blocks[blk] = nil
 	bar.align[aln] = append(bar.align[aln], blk)
+	bar.Names[name] = blk
 }
 
 // Draw entire bar

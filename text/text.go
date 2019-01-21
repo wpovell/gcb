@@ -13,6 +13,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+// Global font to use
 var face *truetype.Font
 
 // Load font to be used by bar
@@ -26,11 +27,13 @@ func init() {
 	log.Fatal(err)
 }
 
+// Get position for text
 func Point(x int) fixed.Point26_6 {
 	// This is a maybe-correct formula to center the text vertically
 	return fixed.P(x, (config.FontSize/2)+(config.BarH/2)-2)
 }
 
+// Return a new drawer for the global bar font
 func Drawer() *font.Drawer {
 	return &font.Drawer{
 		Src: image.NewUniform(config.FG),

@@ -6,14 +6,20 @@ import (
 	"github.com/BurntSushi/xgbutil/xgraphics"
 )
 
+// Font config
 const (
 	FontFn   = "/home/wpovell/.local/share/fonts/FiraCode-Regular.ttf"
 	FontSize = 12
 	FontDpi  = 72
-	BarH     = 27
-	Padding  = 10
 )
 
+// Dimensions
+const (
+	BarH    = 27
+	Padding = 10
+)
+
+// Colors used by bar
 var FG, BG, Bright xgraphics.BGRA
 
 func init() {
