@@ -2,9 +2,10 @@ GCB = ./cmd/gcb
 GCBS = ./cmd/gcbs
 SRC = $(shell find . -name '*.go')
 GO = go
-.PHONY: clean all run race
 
-all: gcb gcbs
+.PHONY: clean all run race fmt
+
+all: fmt gcb gcbs
 
 gcb: $(SRC)
 	$(GO) build $(GCB)
@@ -20,3 +21,6 @@ race:
 
 clean:
 	rm -f ./gcb ./gcbs
+
+fmt:
+	gofmt -l -w .

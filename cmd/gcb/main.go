@@ -43,9 +43,10 @@ func main() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
+	println()
 
 	// Cancel all goroutines
-	log.Log("\nStopping", "stop")
+	log.Log("Stopping", "stop")
 	cancel()
 	wg.Wait()
 	log.Log("Done", "stop")
