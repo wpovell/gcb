@@ -14,8 +14,11 @@ import (
 )
 
 type MsgEvent struct {
-	Msg string
+	Name string
+	Msg  string
 }
+
+const sock_name = "/tmp/gcb.sock"
 
 // Handle a socket connection
 func handle(cn net.Conn, bar *bar.Bar) {
@@ -34,7 +37,8 @@ func handle(cn net.Conn, bar *bar.Bar) {
 			log.Log(fmt.Sprintf("Invalid message: %#v", parts), "warn", "ipc")
 			return
 		}
-		bar.Names[name].EventCh() <- MsgEvent{parts[1]}
+		msg := parts[1]
+		bar.Names[name].EventCh() <- MsgEvent{name, msg}
 	}
 }
 
@@ -42,8 +46,8 @@ func handle(cn net.Conn, bar *bar.Bar) {
 func Start(bar *bar.Bar, ctx context.Context, wg *sync.WaitGroup) {
 	var err error
 	// Purge old socket if it failed to be removed
-	os.Remove("/tmp/gcb.sock")
-	ln, err := net.Listen("unix", "/tmp/gcb.sock")
+	os.Remove(sock_name)
+	ln, err := net.Listen("unix", sock_name)
 	log.Fatal(err)
 
 	// Cancellation

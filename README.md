@@ -12,7 +12,6 @@ Inspired by [melonbar](https://github.com/onodera-punpun/melonbar).
 
 - Add icons to bar
 - Add themeing
-- Add message system / client
 - Blocks
   - Sound
   - VPN, Lock, Notif

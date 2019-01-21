@@ -1,4 +1,5 @@
-CMD = ./cmd/gcb
+GCB = ./cmd/gcb
+GCBS = ./cmd/gcbs
 SRC = $(shell find . -name '*.go')
 GO = go
 .PHONY: clean all run race
@@ -6,13 +7,16 @@ GO = go
 all: gcb
 
 gcb: $(SRC)
-	$(GO) build $(CMD)
+	$(GO) build $(GCB)
+
+gcbs: $(SRC)
+	$(GO) build $(GCBS)
 
 run:
-	$(GO) run $(CMD)
+	$(GO) run $(GCB)
 
 race:
-	$(GO) run -race $(CMD)
+	$(GO) run -race $(GCB)
 
 clean:
-	rm ./gcb
+	rm -f ./gcb ./gcbs
