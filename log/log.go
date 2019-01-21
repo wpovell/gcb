@@ -1,27 +1,26 @@
 package log
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 )
 
+// Disable logging entirely
 const disable = true
 
+// Enable specific tags
 var enabled_tags = map[string]bool{
 	"stop": false,
+	"draw": false,
 }
 
+// Log and panic if an error
 func Fatal(err error) {
 	if err != nil {
 		panic(errors.Wrap(err, ""))
 	}
 }
 
-func Struct(s interface{}) {
-	fmt.Printf("%+v\n", s)
-}
-
+// Log if any of tags are enabled
 func Log(s string, tags ...string) {
 	if disable {
 		return

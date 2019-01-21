@@ -62,6 +62,8 @@ func (bar *Bar) AddBlock(aln Align, blk Block) {
 
 // Draw entire bar
 func (bar *Bar) draw() {
+	log.Log("Drawing", "draw")
+
 	// Background
 	bar.img.For(func(x, y int) xgraphics.BGRA {
 		return config.BG
