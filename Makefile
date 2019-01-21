@@ -4,7 +4,7 @@ SRC = $(shell find . -name '*.go')
 GO = go
 .PHONY: clean all run race
 
-all: gcb
+all: gcb gcbs
 
 gcb: $(SRC)
 	$(GO) build $(GCB)
