@@ -32,9 +32,7 @@ func (wi *Wifi) Interval() time.Duration {
 
 func (wi *Wifi) Text() *w.TextData {
 	txt, err := ssid(intf)
-	// Can probably be connected to a wifi w/o a name but not sure
-	// how else to differentiate
-	if err != nil || txt == "" {
+	if err != nil {
 		return w.NewTextData().Text(iconNoWifi)
 	} else {
 		return w.NewTextData().Color(fmt.Sprintf("%s %s", iconWifi, txt), config.Bright)
